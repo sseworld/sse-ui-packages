@@ -1,0 +1,43 @@
+/**
+ * A React component to view a PDF document
+ *
+ * @see https://sseworld.github.io/pdf-viewer
+ * @license https://sseworld.github.io/pdf-viewer/license
+ * @copyright 2024 SSE World <help@world.sse>
+ */
+
+.rpv-core__minimal-button {
+    background-color: transparent;
+    border: none;
+    border-radius: var(--rpv-radius-sm);
+    color: rgb(var(--rpv-color-base-content));
+    cursor: pointer;
+    height: 2rem;
+    padding: 0 0.5rem;
+
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+    &:hover {
+        background-color: rgba(var(--rpv-color-base-content), 0.1);
+    }
+
+    &--disabled {
+        color: rgba(var(--rpv-color-base-content), 0.3);
+    }
+
+    &--rtl {
+        direction: rtl;
+    }
+
+    &--selected {
+        background-color: rgb(var(--rpv-color-neutral));
+        color: rgb(var(--rpv-color-neutral-content));
+    }
+
+    &--selected:hover {
+        background-color: rgb(var(--rpv-color-neutral));
+        color: rgb(var(--rpv-color-neutral-content));
+    }
+}

@@ -1,0 +1,142 @@
+/**
+ * A React component to view a PDF document
+ *
+ * @see https://sseworld.github.io/pdf-viewer
+ * @license https://sseworld.github.io/pdf-viewer/license
+ * @copyright 2024 SSE World <help@world.sse>
+ */
+
+'use client';
+
+import { attachmentPlugin, type AttachmentPlugin } from '@sse-ui/pdf-attachment';
+import { bookmarkPlugin, type BookmarkPlugin } from '@sse-ui/pdf-bookmark';
+import {
+    TextDirection,
+    classNames,
+    createStore,
+    type PdfJs,
+    type Plugin,
+    type PluginOnDocumentLoad,
+    type RenderViewer,
+} from '@sse-ui/pdf-core';
+import { thumbnailPlugin, type ThumbnailPlugin, type ThumbnailPluginProps } from '@sse-ui/pdf-thumbnail';
+import { toolbarPlugin, type ToolbarPlugin, type ToolbarPluginProps, type ToolbarProps } from '@sse-ui/pdf-toolbar';
+import * as React from 'react';
+import { Sidebar, SidebarTab } from './Sidebar';
+import { type StoreProps } from './types/StoreProps';
+
+export interface DefaultLayoutPlugin extends Plugin {
+    activateTab(index: number): void;
+    toggleTab(index: number): void;
+    readonly attachmentPluginInstance: AttachmentPlugin;
+    readonly bookmarkPluginInstance: BookmarkPlugin;
+    readonly thumbnailPluginInstance: ThumbnailPlugin;
+    readonly toolbarPluginInstance: ToolbarPlugin;
+}
+
+export interface DefaultLayoutPluginProps {
+    thumbnailPlugin?: ThumbnailPluginProps;
+    toolbarPlugin?: ToolbarPluginProps;
+    renderToolbar?: (Toolbar: (props: ToolbarProps) => React.ReactElement) => React.ReactElement;
+    setInitialTab?: (doc: PdfJs.PdfDocument) => Promise<number>;
+    sidebarTabs?: (defaultTabs: SidebarTab[]) => SidebarTab[];
+}
+
+export const defaultLayoutPlugin = (props?: DefaultLayoutPluginProps): DefaultLayoutPlugin => {
+    const store = React.useMemo(
+        () =>
+            createStore<StoreProps>({
+                isCurrentTabOpened: false,
+                currentTab: -1,
+            }),
+        [],
+    );
+
+    const attachmentPluginInstance = attachmentPlugin();
+    const bookmarkPluginInstance = bookmarkPlugin();
+    const thumbnailPluginInstance = thumbnailPlugin(props ? props.thumbnailPlugin : {});
+    const toolbarPluginInstance = toolbarPlugin(props ? props.toolbarPlugin : {});
+
+    const { Attachments } = attachmentPluginInstance;
+    const { Bookmarks } = bookmarkPluginInstance;
+    const { Thumbnails } = thumbnailPluginInstance;
+    const { Toolbar } = toolbarPluginInstance;
+
+    const sidebarTabs = props ? props.sidebarTabs : (defaultTabs: SidebarTab[]) => defaultTabs;
+
+    const plugins = [attachmentPluginInstance, bookmarkPluginInstance, thumbnailPluginInstance, toolbarPluginInstance];
+
+    return {
+        // The plugin instances
+        attachmentPluginInstance,
+        bookmarkPluginInstance,
+        thumbnailPluginInstance,
+        toolbarPluginInstance,
+        dependencies: plugins,
+        activateTab: (index: number) => {
+            store.update('currentTab', index);
+        },
+        toggleTab: (index: number) => {
+            // Get the current active tab
+            const currentTab = store.get('currentTab');
+            store.update('isCurrentTabOpened', !store.get('isCurrentTabOpened'));
+            if (currentTab !== index) {
+                store.update('currentTab', index);
+            }
+        },
+        renderViewer: (renderProps: RenderViewer) => {
+            const { slot } = renderProps;
+            const mergeSubSlot =
+                slot.subSlot && slot.subSlot.attrs
+                    ? {
+                          className: slot.subSlot.attrs.className,
+                          'data-testid': slot.subSlot.attrs['data-testid'],
+                          ref: slot.subSlot.attrs.ref,
+                          style: slot.subSlot.attrs.style,
+                      }
+                    : {};
+
+            slot.children = (
+                <div className="rpv-default-layout__container">
+                    <div
+                        data-testid="default-layout__main"
+                        className={classNames({
+                            'rpv-default-layout__main': true,
+                            'rpv-default-layout__main--rtl':
+                                renderProps.themeContext.direction === TextDirection.RightToLeft,
+                        })}
+                    >
+                        <Sidebar
+                            attachmentTabContent={<Attachments />}
+                            bookmarkTabContent={<Bookmarks />}
+                            store={store}
+                            thumbnailTabContent={<Thumbnails />}
+                            tabs={sidebarTabs}
+                        />
+                        <div className="rpv-default-layout__body" data-testid="default-layout__body">
+                            <div className="rpv-default-layout__toolbar">
+                                {props && props.renderToolbar ? props.renderToolbar(Toolbar) : <Toolbar />}
+                            </div>
+                            <div {...mergeSubSlot}>{slot.subSlot.children}</div>
+                        </div>
+                    </div>
+                    {slot.children}
+                </div>
+            );
+
+            // Reset the sub slot
+            slot.subSlot.attrs = {};
+            slot.subSlot.children = <></>;
+
+            return slot;
+        },
+        onDocumentLoad: (documentLoadProps: PluginOnDocumentLoad) => {
+            if (props && props.setInitialTab) {
+                props.setInitialTab(documentLoadProps.doc).then((initialTab) => {
+                    store.update('currentTab', initialTab);
+                    store.update('isCurrentTabOpened', true);
+                });
+            }
+        },
+    };
+};

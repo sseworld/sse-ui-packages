@@ -1,0 +1,9 @@
+
+        "j1": "rollup -c ../../rollup.config.cjs",
+
+scroll-mode
+
+npm run j1
+npm run css
+cp src/index.d.ts lib 
+cp dist/index.js lib

@@ -1,0 +1,8 @@
+{
+  "name": "sse-ui-packages",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "http://github.com/sse-ui-packages",
+  "author": "SSE World",
+  "license": "MIT"
+}

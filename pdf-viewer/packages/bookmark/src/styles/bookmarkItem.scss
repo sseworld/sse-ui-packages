@@ -1,0 +1,41 @@
+ /**
+ * A React component to view a PDF document
+ *
+ * @see https://sseworld.github.io/pdf-viewer
+ * @license https://sseworld.github.io/pdf-viewer/license
+ * @copyright 2024 SSE World <help@world.sse>
+ */
+
+.rpv-bookmark__item {
+    align-items: center;
+    color: var(--rpv-bookmark__item-color);
+    cursor: pointer;
+    display: flex;
+    padding-bottom: 0.25rem;
+    padding-right: 0.25rem;
+    padding-top: 0.25rem;
+
+    &:focus {
+        background-color: rgba(var(--rpv-color-base-content), 0.1);
+        outline: 0;
+    }
+
+    &:hover {
+        background-color: rgba(var(--rpv-color-base-content), 0.1);
+    }
+}
+
+.rpv-bookmark__toggle {
+    // Center the icon
+    align-items: center;
+    display: flex;
+    height: 1rem;
+    margin-right: 0.25rem;
+    width: 1rem;
+}
+
+.rpv-bookmark__title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-decoration: none;
+}

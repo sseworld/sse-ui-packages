@@ -1,0 +1,12 @@
+/**
+ * A React component to view a PDF document
+ *
+ * @see https://sseworld.github.io/pdf-viewer
+ * @license https://sseworld.github.io/pdf-viewer/license
+ * @copyright 2024 SSE World <help@world.sse>
+ */
+
+.rpv-core__menu-divider {
+    border-bottom: 1px solid rgba(var(--rpv-color-base-content), 0.1);
+    margin: 0.25rem 0;
+}
